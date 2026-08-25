@@ -1,0 +1,6 @@
+node_modules/
+.DS_Store
+# assets locales: logos e identidad propia no se publican
+skills/grabar-demo/assets/
+grabaciones/
+*.respaldo-*

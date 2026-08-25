@@ -1,0 +1,7 @@
+{
+  "name": "grabar-demo",
+  "private": true,
+  "type": "module",
+  "description": "Dependencias de la skill grabar-demo (Playwright). node_modules no se versiona: correr npm install dentro de la carpeta de la skill.",
+  "dependencies": { "playwright": "^1.62.1" }
+}

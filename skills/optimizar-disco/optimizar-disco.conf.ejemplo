@@ -1,0 +1,27 @@
+# Configuración de diagnosticar-disco.py
+# Cópialo a ~/.optimizar-disco.conf y ajústalo. Una directiva por línea, formato `clave: valor`.
+# Las líneas que empiezan con # se ignoran.
+
+# Corte de inactividad en días: cuántos días sin modificar (o sin commits, para node_modules)
+# hacen que algo se considere candidato. 180 es conservador; 90 encuentra más.
+dias: 180
+
+# Dónde buscar node_modules. Repetible. Mientras más acotado, más rápido el diagnóstico.
+raiz: ~/proyectos
+
+# Rutas que NUNCA se ofrecen como candidatas. Repetible, acepta globs (*) y ~ para el home.
+# La protección gana sobre cualquier criterio automático.
+#
+# Escribe aquí todo lo que un programa no puede adivinar: modelos que sí usas, carpetas de
+# trabajo en curso, datos de un cliente. Agregar una línea de más no cuesta nada; que falte
+# una puede costar trabajo perdido.
+#
+# Nota: el programa YA detecta y excluye por su cuenta las imágenes de VM (vmlinuz, rootfs.img,
+# *.raw, *.qcow2), las rutas con un proceso vivo usándolas y los repos con commits recientes.
+# Esta lista es para lo que esas reglas no pueden saber.
+
+protegido: ~/.cache/whisper-models
+protegido: ~/.cache/huggingface/hub/models--handy-computer*
+protegido: ~/Library/Caches/ms-playwright
+protegido: ~/Downloads/cow-dvr
+protegido: ~/Downloads/Videos
