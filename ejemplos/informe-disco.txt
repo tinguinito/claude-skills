@@ -1,0 +1,107 @@
+<!-- Salida real de: python3 diagnosticar-disco.py
+     Rutas y nombres de proyecto anonimizados. Las cifras son las de una máquina real. -->
+
+========================================================================
+DIAGNÓSTICO DE DISCO
+========================================================================
+  460.4 GB totales · 333.7 GB usados · 91.2 GB libres · 79% de uso
+  Corte de inactividad: 90 días
+  Config: ~/.optimizar-disco.conf
+
+QUÉ OCUPA EL DISCO
+    55.9 GB  ~/Library
+    34.5 GB  ~/proyectos
+    15.6 GB  ~/Movies
+    14.0 GB  ~/Documents
+     4.1 GB  ~/.android
+     4.0 GB  ~/Desktop
+     3.6 GB  ~/.vscode
+     3.5 GB  ~/.cache
+     2.9 GB  ~/Downloads
+     2.7 GB  ~/.nvm
+     2.1 GB  ~/.local
+     2.0 GB  ~/.gradle
+
+OPORTUNIDADES: 3.6 GB recuperables en 13 rutas
+
+  Cachés de gestores de paquetes (se regeneran solos) — 127.5 MB
+      89.2 MB  2026-07-24  ~/.cargo/registry/cache
+                           caché de gestor de paquetes, se regenera al instalar
+      36.9 MB  2026-08-25  ~/Library/Caches/Homebrew
+                           caché de gestor de paquetes, se regenera al instalar
+       1.5 MB  2026-08-25  ~/.npm/_cacache
+                           caché de gestor de paquetes, se regenera al instalar
+
+  node_modules de repos inactivos — 3.3 GB
+     951.5 MB  2026-03-25  ~/proyectos/panel-interno/node_modules
+                           último commit del repo: 2026-03-25. Se reinstala con 'npm install'
+     669.3 MB  2026-03-16  ~/proyectos/auth-base/node_modules
+                           último commit del repo: 2026-03-16. Se reinstala con 'npm install'
+     533.4 MB  2026-04-20  ~/proyectos/punto-venta/node_modules
+                           último commit del repo: 2026-04-20. Se reinstala con 'npm install'
+     500.6 MB  2026-03-13  ~/proyectos/pdf-tool/node_modules
+                           último commit del repo: 2026-03-13. Se reinstala con 'npm install'
+     365.6 MB  2026-05-14  ~/proyectos/reportes-planta/node_modules
+                           último commit del repo: 2026-05-14. Se reinstala con 'npm install'
+     326.8 MB  2026-03-13  ~/proyectos/app-bienestar/node_modules
+                           último commit del repo: 2026-03-13. Se reinstala con 'npm install'
+      56.4 MB  2026-03-25  ~/proyectos/sitio-corporativo/functions/node_modules
+                           último commit del repo: 2026-03-25. Se reinstala con 'npm install'
+       5.3 MB  2026-03-16  ~/proyectos/auth-base/client/node_modules
+                           último commit del repo: 2026-03-16. Se reinstala con 'npm install'
+
+  Cachés de aplicaciones — 135.5 MB
+     115.7 MB  2026-08-25  ~/Library/Caches/Google
+                           caché de Chrome, se reconstruye
+      19.8 MB  2026-08-25  ~/Library/Caches/ms-playwright-mcp
+                           navegador headless temporal, se re-descarga
+
+EXCLUIDO A PROPÓSITO (22 rutas)
+  Esto es lo que un borrado a ciegas habría roto:
+    ~/.cache/huggingface/hub/models--handy-computer--canary-180m-flash-gguf
+        modelo con actividad reciente (2026-07-21)
+    ~/.cache/huggingface/hub/models--handy-computer--nemotron-3.5-asr-streaming-0.6b-gguf
+        modelo con actividad reciente (2026-07-21)
+    ~/proyectos/agente/mock-cliente/node_modules
+        repo activo, último commit 2026-08-25
+    ~/proyectos/app-dictado/handy/node_modules
+        repo activo, último commit 2026-07-31
+    ~/proyectos/claude-skills/skills/grabar-demo/node_modules
+        repo activo, último commit 2026-08-26
+    ~/proyectos/server/app/node_modules
+        repo activo, último commit 2026-08-15
+    ~/proyectos/proyecto-electrico/api-electrico/node_modules
+        repo activo, último commit 2026-08-24
+    ~/proyectos/proyecto-electrico/app-electrico/node_modules
+        repo activo, último commit 2026-08-24
+    ~/proyectos/proyecto-electrico/webhook-servicio/node_modules
+        repo activo, último commit 2026-08-24
+    ~/proyectos/control-acceso/node_modules
+        repo activo, último commit 2026-07-22
+    ~/proyectos/control-acceso/packages/frontend/node_modules
+        repo activo, último commit 2026-07-22
+    ~/proyectos/plataforma-logistica/node_modules
+        repo activo, último commit 2026-08-26
+    ~/proyectos/plataforma-logistica/api/node_modules
+        repo activo, último commit 2026-08-26
+    ~/proyectos/plataforma-logistica/client/node_modules
+        repo activo, último commit 2026-08-26
+    ~/proyectos/chatbot/web/node_modules
+        repo activo, último commit 2026-08-24
+    ~/proyectos/chatbot/functions/node_modules
+        repo activo, último commit 2026-08-24
+    ~/proyectos/hub-transporte/frontend/node_modules
+        repo activo, último commit 2026-07-23
+    ~/proyectos/hub-transporte/api/node_modules
+        repo activo, último commit 2026-07-23
+    ~/proyectos/pos/node_modules
+        repo activo, último commit 2026-08-24
+    ~/proyectos/pos/packages/frontend/node_modules
+        repo activo, último commit 2026-08-24
+    ~/proyectos/pos/packages/backend/node_modules
+        repo activo, último commit 2026-08-24
+    ~/proyectos/integracion/node_modules
+        no está en un repo git: sin señal de actividad
+
+NADA SE BORRÓ. Este programa solo mide.
+Para obtener el script de limpieza:  --generar limpiar-disco.sh

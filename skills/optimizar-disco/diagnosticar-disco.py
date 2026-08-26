@@ -50,9 +50,18 @@ EXT_VM = {".raw", ".qcow2", ".vmdk", ".vdi", ".img"}
 
 
 # --------------------------------------------------------------------------- utilidades
-def sh(cmd):
+def sh(cmd, timeout=60):
+    """Ejecuta y devuelve stdout. timeout=None para comandos que recorren todo el disco.
+
+    OJO: un `du` sobre un home de cientos de GB tarda varios minutos. Con un timeout corto
+    devolvía "" y el informe mostraba una sección vacía como si no hubiera nada que medir.
+    Un vacío silencioso es peor que un error: parece un dato.
+    """
     try:
-        return subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=60).stdout
+        return subprocess.run(cmd, shell=True, capture_output=True, text=True,
+                              timeout=timeout).stdout
+    except subprocess.TimeoutExpired:
+        return "__TIMEOUT__"
     except Exception:
         return ""
 
@@ -304,7 +313,10 @@ def buscar(cfg, guardia, dias, raices):
 
 
 def top_consumidores(n=12):
-    out = sh(f'du -sk {HOME}/* {HOME}/.[a-z]* 2>/dev/null | sort -rn | head -{n}')
+    # sin timeout: recorrer el home entero puede tardar minutos y es la medición central
+    out = sh(f'du -sk {HOME}/* {HOME}/.[a-z]* 2>/dev/null | sort -rn | head -{n}', timeout=None)
+    if out == "__TIMEOUT__":
+        return [("(la medición del home no terminó a tiempo)", "?")]
     filas = []
     for linea in out.splitlines():
         try:
@@ -328,6 +340,8 @@ def informe(d, tops, cands, excluidos, avisos, dias, conf_origen):
     L.append(f"  Config: {conf_origen or 'ninguna (defaults)'}")
 
     L.append("\nQUÉ OCUPA EL DISCO")
+    if not tops:
+        L.append("  (no se pudo medir: revisa permisos sobre el home)")
     for ruta, t in tops:
         L.append(f"  {t:>9}  {ruta}")
 

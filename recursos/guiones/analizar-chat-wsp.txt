@@ -1,0 +1,35 @@
+$ python3 ~/.claude/skills/analizar-chat-wsp/wsp_dossier.py "WhatsApp Chat - Planta.zip"
+  material en ./dossier-planta-media
+  6 mensajes parseados (formato ios)
+#pausa 5
+  [1/2]
+  transcribiendo PTT-20260826-WA0001.opus ...
+#pausa 6
+  [2/2]
+  transcribiendo VID-20260826-WA0002.mp4 ...
+#pausa 8
+  ./dossier-planta.md
+#pausa 6
+#limpiar
+$ head -32 dossier-planta.md
+# Dossier de chat WhatsApp - Planta
+> Audios y videos transcritos localmente con whisper.cpp
+#pausa 5
+## Resumen del material
+- Mensajes: 6
+- Participantes: Rodrigo Paredes (4), Ana Muñoz (2)
+- Adjuntos: texto 2, audio 1, imagen 1, video 1, documento 1
+#pausa 8
+## Documentos — leerlos con el tool `Read`
+- `./dossier-planta-media/cotizacion-bascula.pdf` - enviado por Rodrigo Paredes
+#pausa 6
+## Conversación completa
+**[08:41:55] Rodrigo Paredes:** audio (PTT-20260826-WA0001.opus)
+> Hola equipo, les cuento que probamos la báscula nueva en la planta y quedó
+> funcionando. El pesaje automático anda bien, pero el ticket sale con la fecha
+> del día anterior.
+#pausa 12
+**[08:43:20] Ana Muñoz:** video (VID-20260826-WA0002.mp4)
+> Perfecto. Yo reviso el tema de la fecha mañana temprano. Igual necesito que me
+> manden la cotización actualizada para cerrar con el proveedor.
+#pausa 14

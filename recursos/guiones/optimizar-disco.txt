@@ -1,0 +1,48 @@
+$ df -h /System/Volumes/Data | tail -1
+/dev/disk3s5   460Gi   389Gi    34Gi    93%    /System/Volumes/Data
+#pausa 8
+$ python3 ~/.claude/skills/optimizar-disco/diagnosticar-disco.py
+========================================================================
+DIAGNÓSTICO DE DISCO
+========================================================================
+  460.4 GB totales - 389.2 GB usados - 34.1 GB libres - 93% de uso
+  Corte de inactividad: 180 días
+#pausa 6
+QUÉ OCUPA EL DISCO
+    70.0 GB  ~/Library
+    40.0 GB  ~/proyectos
+    18.0 GB  ~/.cache
+    11.0 GB  ~/.ollama
+     8.3 GB  ~/.npm
+#pausa 8
+OPORTUNIDADES: 38.9 GB recuperables en 34 rutas
+#pausa 4
+  Modelos de IA sin uso reciente — 24.4 GB
+      13.0 GB  2025-05-02  ~/.cache/huggingface/hub/models--tiiuae--falcon-7b-instruct
+                           modelo de HuggingFace sin modificar desde 2025-05-02
+      11.0 GB  2026-03-22  ~/.ollama/models
+                           Ollama solo guarda fecha de descarga, no de uso: confírmalo tú
+       525 MB  2025-05-02  ~/.cache/huggingface/hub/models--gpt2
+                           modelo de HuggingFace sin modificar desde 2025-05-02
+#pausa 8
+  Caché de gestores de paquetes — 8.3 GB
+       7.1 GB  2026-08-24  ~/.npm/_cacache
+       1.2 GB  2026-08-19  ~/.npm/_npx
+  node_modules de repos inactivos — 5.6 GB
+       951 MB  2026-03-25  ~/proyectos/panel-interno/node_modules
+                           último commit del repo: 2026-03-25
+       669 MB  2026-03-16  ~/proyectos/auth-base/node_modules
+                           último commit del repo: 2026-03-16
+#pausa 10
+EXCLUIDO A PROPÓSITO (23 rutas)
+  Esto es lo que un borrado a ciegas habría roto:
+    ~/Library/Application Support/Claude/vm_bundles
+        contiene una imagen de VM o disco virtual, está en uso
+    ~/.cache/whisper-models
+        protegido por la config
+    ~/proyectos/plataforma/node_modules
+        repo activo, último commit 2026-08-25
+#pausa 12
+NADA SE BORRÓ. Este programa solo mide.
+Para obtener el script de limpieza:  --generar limpiar-disco.sh
+#pausa 10

@@ -4,3 +4,5 @@ node_modules/
 skills/grabar-demo/assets/
 grabaciones/
 *.respaldo-*
+# frames temporales del generador de medios
+recursos/.frames-*/
