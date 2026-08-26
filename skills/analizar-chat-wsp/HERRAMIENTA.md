@@ -71,8 +71,14 @@ meses. El costo de mantención tiende a cero.
 - **La transcripción es automática.** Es buena, pero no es un acta. Antes de usar una
   cita literal como prueba (un precio, un compromiso, una cifra), escucha el audio.
   El dossier lleva ese aviso impreso en la cabecera.
-- **Video y documentos** se listan pero no se procesan. Si hace falta el audio de un
-  video, extraerlo con `ffmpeg` y pasarlo aparte.
+- **Los videos se transcriben igual que los audios.** ffmpeg extrae la pista de audio de un
+  `.mp4` con el mismo comando que usa para un `.opus`, así que no hay dos rutas de código. En el
+  dossier salen con 🎬 en vez de 🎙️, para que se sepa que la fuente era un video. Un video de
+  varios minutos tarda bastante más que una nota de voz: `--sin-video` los salta.
+- **Los documentos no se leen, se listan con su ruta absoluta** en una sección propia, igual que
+  las imágenes. El agente abre PDF, docx y planillas de forma nativa: interpretarlos en el script
+  sería reimplementar lo que ya sabe hacer. Una cotización adjunta suele traer el dato duro que el
+  texto del chat no dice.
 - Formatos de export soportados: **iOS** (`[DD-MM-YY, HH:MM:SS] Autor:`) y **Android**
   (`DD/MM/YYYY, HH:MM - Autor:`). El detectado se declara en la cabecera del dossier —
   si dice `desconocido`, el parseo falló y hay que revisar el `.txt`.

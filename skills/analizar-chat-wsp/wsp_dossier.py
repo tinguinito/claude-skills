@@ -251,19 +251,24 @@ def construir_dossier(mensajes: list[Mensaje], carpeta: Path, titulo: str,
     conteo = {t: sum(1 for m in mensajes if m.tipo == t)
               for t in ("texto", "audio", "imagen", "video", "documento")}
     imagenes = [m for m in mensajes if m.tipo == "imagen"]
-    pendientes = [m for m in mensajes if m.tipo in ("video", "documento")]
+    documentos = [m for m in mensajes if m.tipo == "documento"]
 
     L: list[str] = []
     L.append(f"# Dossier de chat WhatsApp — {titulo}")
     L.append("")
-    if conteo["audio"] and modelo.name != "null":
-        L.append("> Generado por `wsp-dossier`. Audios transcritos localmente con "
+    hablado = conteo["audio"] + conteo["video"]
+    # La cabecera describe lo que REALMENTE se transcribió, no lo que venía en el export:
+    # con --sin-video hay videos en el chat pero ninguno tiene transcripción.
+    video_transcrito = any(m.tipo == "video" and m.transcripcion for m in mensajes)
+    if hablado and modelo.name != "null":
+        que = "Audios y videos transcritos" if video_transcrito else "Audios transcritos"
+        L.append(f"> Generado por `wsp-dossier`. {que} localmente con "
                  f"whisper.cpp (`{modelo.name}`). Formato de export detectado: {formato}.")
         L.append("> Las transcripciones son automáticas: verifica una cita literal "
                  "contra el audio antes de usarla como prueba.")
     else:
-        nota = ("audios sin transcribir (modo `--sin-audio`)" if conteo["audio"]
-                else "este export no trae audios")
+        nota = ("audios sin transcribir (modo `--sin-audio`)" if hablado
+                else "este export no trae audios ni videos")
         L.append(f"> Generado por `wsp-dossier`: {nota}. "
                  f"Formato de export detectado: {formato}.")
     L.append("")
@@ -287,11 +292,14 @@ def construir_dossier(mensajes: list[Mensaje], carpeta: Path, titulo: str,
             L.append(f"- `{(carpeta / m.adjunto)}` — enviada por {m.autor}, {m.fecha} {m.hora}")
         L.append("")
 
-    if pendientes:
-        L.append("## Otros adjuntos (sin procesar)")
+    if documentos:
+        L.append("## Documentos — leerlos con el tool `Read`")
         L.append("")
-        for m in pendientes:
-            L.append(f"- [{m.tipo}] `{(carpeta / m.adjunto)}` — {m.autor}, {m.fecha} {m.hora}")
+        L.append("El script no los interpreta: el agente abre PDF, docx y planillas directo.")
+        L.append("Una cotización o una ficha técnica adjunta suele traer el dato duro del chat.")
+        L.append("")
+        for m in documentos:
+            L.append(f"- `{(carpeta / m.adjunto)}` — enviado por {m.autor}, {m.fecha} {m.hora}")
         L.append("")
 
     L.append("## Conversación completa")
@@ -312,8 +320,13 @@ def construir_dossier(mensajes: list[Mensaje], carpeta: Path, titulo: str,
             L.append("")
         elif m.tipo == "imagen":
             L.append(f"{cabecera} 🖼️ _imagen_ → `{m.adjunto}` (ver sección Imágenes)")
-        elif m.tipo in ("video", "documento"):
-            L.append(f"{cabecera} 📎 _{m.tipo}_ → `{m.adjunto}`")
+        elif m.tipo == "video":
+            L.append(f"{cabecera} 🎬 _video_ (`{m.adjunto}`)")
+            L.append("")
+            L.append(f"> {m.transcripcion or '[video sin transcribir]'}")
+            L.append("")
+        elif m.tipo == "documento":
+            L.append(f"{cabecera} 📎 _documento_ → `{m.adjunto}` (ver sección Documentos)")
         else:
             cuerpo = m.cuerpo
             if "\n" in cuerpo:
@@ -341,6 +354,8 @@ def main() -> None:
     ap.add_argument("--idioma", "-l", default="es", help="idioma del audio (default: es)")
     ap.add_argument("--hilos", "-t", type=int, default=max(1, (os.cpu_count() or 4) - 2))
     ap.add_argument("--sin-audio", action="store_true", help="no transcribir (solo texto y listado)")
+    ap.add_argument("--sin-video", action="store_true",
+                    help="no transcribir el audio de los videos (pueden ser largos y lentos)")
     ap.add_argument("--json", dest="json_out", help="además, volcar los mensajes a este .json")
     args = ap.parse_args()
 
@@ -367,7 +382,12 @@ def main() -> None:
     log(f"{len(mensajes)} mensajes parseados (formato {formato})")
 
     if not args.sin_audio:
-        audios = [m for m in mensajes if m.tipo == "audio"]
+        # Los videos también se transcriben: ffmpeg extrae la pista de audio de un .mp4 con el
+        # MISMO comando que usa para un .opus, así que no hacen falta dos rutas de código.
+        # Antes solo se listaban, y el contenido hablado del video se perdía del dossier: en un
+        # chat de trabajo, un video de alguien mostrando algo a cámara suele traer el dato clave.
+        tipos = ["audio"] if args.sin_video else ["audio", "video"]
+        audios = [m for m in mensajes if m.tipo in tipos]
         for i, m in enumerate(audios, 1):
             ruta = carpeta / m.adjunto
             if not ruta.is_file():

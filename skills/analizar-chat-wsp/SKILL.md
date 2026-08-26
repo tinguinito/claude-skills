@@ -37,11 +37,15 @@ whisper-cli -m ~/.cache/whisper-models/ggml-large-v3-turbo-q5_0.bin -f /tmp/a.wa
 
 **2. Leer el dossier completo** con `Read`. No trabajar solo con el resumen de cabecera.
 
-**3. Leer cada imagen con `Read`.** El dossier las lista con su ruta absoluta en la
-sección "Imágenes". El script no las interpreta a propósito — Claude tiene visión nativa,
-así que se ven directo, sin API ni costo. **No omitir este paso:** una captura de
-pantalla suele traer el dato duro (un precio, un error, una pantalla del producto) que el
-texto no dice.
+**3. Leer cada imagen y cada documento con `Read`.** El dossier los lista con su ruta absoluta en las
+secciones "Imágenes" y "Documentos". El script no los interpreta a propósito: Claude tiene
+visión nativa y abre PDF y docx directo, sin API ni costo. **No omitir este paso:** una captura
+de pantalla o una cotización adjunta suele traer el dato duro (un precio, un error, una pantalla
+del producto) que el texto no dice.
+
+Los **videos sí vienen transcritos** en el cuerpo del dossier, marcados con 🎬: el script les
+extrae el audio y los pasa por whisper igual que a las notas de voz. Si el export trae videos
+largos y no interesan, `--sin-video` los salta.
 
 **4. Guardar el material fuera de git.** Solo el `.md` se versiona; los audios e imágenes
 pesan y son privados. El script deja el media en una carpeta `<nombre>-media/` junto a la
