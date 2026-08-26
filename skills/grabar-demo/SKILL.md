@@ -115,6 +115,12 @@ para responder cuando el cliente pregunte.
 
 ## Escritorio y móvil
 
+**Si grabas en móvil y sale el layout de escritorio, a la página le falta el meta viewport.**
+Sin `<meta name="viewport" content="width=device-width, initial-scale=1">`, el navegador usa un
+viewport virtual de ~980 px e ignora las media queries, aunque el video mida 500 px de ancho. El
+resultado es un demo "móvil" con la tabla completa y la letra minúscula. Se detecta mirando un
+frame; se arregla en la página, no en el guion.
+
 `--perfil movil` en la línea de comandos manda sobre el `viewport` del guion, así que el
 mismo archivo se graba en los dos formatos. Lo que **no** se traslada solo es el recorrido:
 un layout móvil esconde el menú lateral y los selectores del guion de escritorio dejan de

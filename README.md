@@ -104,6 +104,18 @@ perdida: un "mañana tipo 16 hrs" dicho un martes se entendió como jueves.
 
 ## `grabar-demo` — el video de tu producto, escrito como código
 
+![grabar-demo](media/grabar-demo.gif)
+
+Ese GIF **está grabado con la propia skill**, sobre la app de ejemplo que viene en el repo. Para
+reproducirlo entero:
+
+```bash
+cd ejemplos/app-demo && python3 -m http.server 21000 &
+node ../../skills/grabar-demo/scripts/grabar.mjs ../demos/panel.mjs --salida /tmp/grab
+../../skills/grabar-demo/scripts/montar.sh --in /tmp/grab/panel-escritorio.webm \
+  --out demo.mp4 --speed 1.5 --sin-cierre
+```
+
 Graba cualquier app web con Playwright y la monta con `ffmpeg`: recorta el marco del navegador,
 agrega logos, fundidos, aceleración y música.
 
@@ -115,7 +127,8 @@ scripts/montar.sh --in grabaciones/panel-escritorio.webm --out demo.mp4 --speed 
 El recorrido vive en un archivo, no en tus manos: cuando la app cambia, lo vuelves a correr y el
 video sale igual. Incluye un cursor dibujado (Playwright no graba el puntero, y sin él el video
 muestra cosas que cambian sin causa visible), rótulos sobreimpresos, y perfiles de escritorio y
-móvil desde el mismo guion.
+móvil desde el mismo guion: `--perfil movil` produce el vertical de
+[15 segundos](media/grabar-demo-vert.mp4) que sirve para redes, con el layout móvil real.
 
 Dos reglas que no se saltan, ambas aprendidas a golpes:
 

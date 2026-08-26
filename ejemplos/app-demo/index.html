@@ -1,0 +1,146 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planta Norte — Control de pesaje</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#f6f7f9;--panel:#fff;--linea:#e3e6ea;--texto:#1a1f26;--suave:#6b7580;
+        --acento:#2f6df6;--ok:#12854a;--alerta:#b25c00;--sombra:0 1px 3px rgba(16,24,40,.08)}
+  body{font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+       background:var(--bg);color:var(--texto)}
+  header{background:var(--panel);border-bottom:1px solid var(--linea);padding:14px 32px;
+         display:flex;align-items:center;gap:28px}
+  .marca{font-weight:650;font-size:16px;letter-spacing:-.2px}
+  .marca span{color:var(--acento)}
+  nav{display:flex;gap:22px;margin-left:8px}
+  nav a{color:var(--suave);text-decoration:none;font-size:14px;padding:6px 2px;border-bottom:2px solid transparent;cursor:pointer}
+  nav a:hover{color:var(--texto)}
+  nav a.on{color:var(--acento);border-bottom-color:var(--acento)}
+  .yo{margin-left:auto;display:flex;align-items:center;gap:10px;color:var(--suave);font-size:14px}
+  .av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#2f6df6,#7aa5ff)}
+  main{padding:28px 32px;max-width:1400px}
+  h1{font-size:22px;font-weight:640;letter-spacing:-.3px}
+  .sub{color:var(--suave);font-size:14px;margin-top:4px}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:24px 0}
+  .kpi{background:var(--panel);border:1px solid var(--linea);border-radius:10px;padding:18px;box-shadow:var(--sombra)}
+  .kpi .t{color:var(--suave);font-size:13px}
+  .kpi .v{font-size:28px;font-weight:650;letter-spacing:-.6px;margin-top:6px}
+  .kpi .d{font-size:12px;margin-top:6px;color:var(--ok)}
+  .kpi .d.baja{color:var(--alerta)}
+  .barra{display:flex;gap:12px;align-items:center;margin:22px 0 14px}
+  input[type=search]{flex:0 0 320px;padding:9px 12px;border:1px solid var(--linea);border-radius:8px;
+        font-size:14px;background:var(--panel);outline:none}
+  input[type=search]:focus{border-color:var(--acento);box-shadow:0 0 0 3px rgba(47,109,246,.12)}
+  .chip{padding:6px 12px;border:1px solid var(--linea);border-radius:999px;background:var(--panel);
+        font-size:13px;color:var(--suave);cursor:pointer}
+  .chip.on{background:var(--acento);color:#fff;border-color:var(--acento)}
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--linea);
+        border-radius:10px;overflow:hidden;box-shadow:var(--sombra)}
+  th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--suave);
+     padding:12px 16px;border-bottom:1px solid var(--linea);font-weight:600}
+  td{padding:13px 16px;border-bottom:1px solid #f0f2f4;font-size:14px}
+  tr:last-child td{border-bottom:none}
+  tbody tr{transition:background .15s}
+  tbody tr:hover{background:#fafbfc}
+  .est{font-size:12px;padding:3px 9px;border-radius:999px;font-weight:560}
+  .ok{background:#e7f5ec;color:var(--ok)}
+  .pend{background:#fdf3e3;color:var(--alerta)}
+  .num{font-variant-numeric:tabular-nums}
+  .vista{display:none}
+  .vista.on{display:block}
+  @media (max-width:640px){
+    header{padding:12px 16px;gap:12px;flex-wrap:wrap}
+    nav{gap:14px;margin-left:0;order:3;width:100%}
+    .yo span{display:none}
+    main{padding:18px 16px}
+    h1{font-size:19px}
+    .kpis{grid-template-columns:repeat(2,1fr);gap:10px;margin:16px 0}
+    .kpi{padding:13px}
+    .kpi .v{font-size:22px}
+    .barra{flex-wrap:wrap;gap:8px}
+    input[type=search]{flex:1 1 100%}
+    th:nth-child(3),td:nth-child(3),th:nth-child(5),td:nth-child(5){display:none}
+    td,th{padding:11px 10px;font-size:13px}
+  }
+</style>
+<header>
+  <div class="marca">Planta<span>Norte</span></div>
+  <nav>
+    <a class="on" data-v="pesajes">Pesajes</a>
+    <a data-v="despachos">Despachos</a>
+    <a data-v="reportes">Reportes</a>
+  </nav>
+  <div class="yo"><span>Rodrigo Paredes</span><div class="av"></div></div>
+</header>
+<main>
+  <div id="pesajes" class="vista on">
+    <h1>Pesajes del día</h1>
+    <div class="sub">Turno mañana · actualizado hace 2 minutos</div>
+    <div class="kpis">
+      <div class="kpi"><div class="t">Camiones pesados</div><div class="v num">48</div><div class="d">+6 vs ayer</div></div>
+      <div class="kpi"><div class="t">Tonelaje total</div><div class="v num">1.284 t</div><div class="d">+3,1%</div></div>
+      <div class="kpi"><div class="t">Tiempo medio</div><div class="v num">4,2 min</div><div class="d">-38 s</div></div>
+      <div class="kpi"><div class="t">Tickets pendientes</div><div class="v num">3</div><div class="d baja">requieren revisión</div></div>
+    </div>
+    <div class="barra">
+      <input type="search" id="buscar" placeholder="Buscar por patente o guía…">
+      <div class="chip on">Todos</div><div class="chip">Pendientes</div><div class="chip">Cerrados</div>
+    </div>
+    <table>
+      <thead><tr><th>Guía</th><th>Patente</th><th>Producto</th><th>Neto</th><th>Hora</th><th>Estado</th></tr></thead>
+      <tbody id="filas"></tbody>
+    </table>
+  </div>
+  <div id="despachos" class="vista">
+    <h1>Despachos</h1>
+    <div class="sub">12 programados para hoy</div>
+    <div class="kpis">
+      <div class="kpi"><div class="t">En ruta</div><div class="v num">7</div><div class="d">a tiempo</div></div>
+      <div class="kpi"><div class="t">En patio</div><div class="v num">3</div><div class="d">esperando carga</div></div>
+      <div class="kpi"><div class="t">Entregados</div><div class="v num">2</div><div class="d">con acta firmada</div></div>
+      <div class="kpi"><div class="t">Retrasados</div><div class="v num">0</div><div class="d">sin incidencias</div></div>
+    </div>
+  </div>
+  <div id="reportes" class="vista">
+    <h1>Reportes</h1>
+    <div class="sub">Exportables a Excel y PDF</div>
+    <div class="kpis">
+      <div class="kpi"><div class="t">Cierre mensual</div><div class="v num">Agosto</div><div class="d">listo para firma</div></div>
+      <div class="kpi"><div class="t">Tonelaje mes</div><div class="v num">31.470 t</div><div class="d">+8,4%</div></div>
+      <div class="kpi"><div class="t">Guías emitidas</div><div class="v num">1.129</div><div class="d">sin anulaciones</div></div>
+      <div class="kpi"><div class="t">Conciliación</div><div class="v num">100%</div><div class="d">cuadrado</div></div>
+    </div>
+  </div>
+</main>
+<script>
+  const datos = [
+    ['G-20841','KXPR-42','Harina de pescado','28,4 t','08:12','ok'],
+    ['G-20842','JHTL-88','Harina de pescado','31,0 t','08:31','ok'],
+    ['G-20843','RVND-19','Aceite crudo','24,7 t','08:54','pend'],
+    ['G-20844','BQMS-71','Harina de pescado','29,8 t','09:10','ok'],
+    ['G-20845','TCLW-05','Aceite crudo','26,2 t','09:38','ok'],
+    ['G-20846','MFDR-63','Sólidos solubles','18,9 t','10:02','pend'],
+    ['G-20847','ZPKA-27','Harina de pescado','30,5 t','10:29','ok'],
+  ];
+  const tb = document.getElementById('filas');
+  const pinta = (f) => tb.innerHTML = f.map(r => `<tr><td class="num">${r[0]}</td><td class="num">${r[1]}</td>
+    <td>${r[2]}</td><td class="num">${r[3]}</td><td class="num">${r[4]}</td>
+    <td><span class="est ${r[5]}">${r[5]==='ok'?'Cerrado':'Pendiente'}</span></td></tr>`).join('');
+  pinta(datos);
+  document.getElementById('buscar').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    pinta(datos.filter(r => r.join(' ').toLowerCase().includes(q)));
+  });
+  document.querySelectorAll('nav a').forEach(a => a.addEventListener('click', () => {
+    document.querySelectorAll('nav a').forEach(x => x.classList.remove('on'));
+    a.classList.add('on');
+    document.querySelectorAll('.vista').forEach(v => v.classList.remove('on'));
+    document.getElementById(a.dataset.v).classList.add('on');
+  }));
+  document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(x => x.classList.remove('on'));
+    c.classList.add('on');
+    const t = c.textContent.trim();
+    pinta(t === 'Todos' ? datos : datos.filter(r => r[5] === (t === 'Pendientes' ? 'pend' : 'ok')));
+  }));
+</script>
