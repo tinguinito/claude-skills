@@ -43,9 +43,15 @@ visión nativa y abre PDF y docx directo, sin API ni costo. **No omitir este pas
 de pantalla o una cotización adjunta suele traer el dato duro (un precio, un error, una pantalla
 del producto) que el texto no dice.
 
-Los **videos sí vienen transcritos** en el cuerpo del dossier, marcados con 🎬: el script les
+Los **videos con voz vienen transcritos** en el cuerpo del dossier, marcados con 🎬: el script les
 extrae el audio y los pasa por whisper igual que a las notas de voz. Si el export trae videos
 largos y no interesan, `--sin-video` los salta.
+
+Los **videos mudos** (grabaciones de pantalla sin narración) no se transcriben, porque whisper
+alucina sobre el silencio y devuelve frases plausibles pero inventadas. El script les extrae una
+rejilla de fotogramas y la lista en la sección "Videos sin narración". **Leerla con `Read`, igual
+que las imágenes, y no saltársela:** cuando alguien graba la pantalla para mostrar un problema,
+ese video suele ser la evidencia más directa de todo el chat.
 
 **4. Guardar el material fuera de git.** Solo el `.md` se versiona; los audios e imágenes
 pesan y son privados. El script deja el media en una carpeta `<nombre>-media/` junto a la

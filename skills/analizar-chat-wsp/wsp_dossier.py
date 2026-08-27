@@ -76,6 +76,10 @@ class Mensaje:
     tipo: str = "texto"        # texto | audio | imagen | video | documento
     transcripcion: str | None = None
     continuacion: list[str] = field(default_factory=list)
+    # Videos mudos: grabaciones de pantalla sin narración. Se resuelven mirándolos,
+    # no transcribiéndolos (ver `hoja_de_contactos`).
+    mudo: bool = False
+    hoja: str | None = None    # ruta al contact sheet, si el video vino mudo
 
     @property
     def cuerpo(self) -> str:
@@ -203,6 +207,61 @@ def ruta_modelo(nombre: str) -> Path:
     )
 
 
+# Bajo este volumen medio se considera que el video no tiene narración. Un video
+# hablado de WhatsApp ronda los -35..-20 dB; una grabación de pantalla muda da -90.
+UMBRAL_SILENCIO_DB = -60.0
+
+
+def volumen_medio_db(ruta: Path) -> float | None:
+    """Volumen medio en dB, o None si el archivo no tiene pista de audio.
+
+    Por qué existe: whisper ALUCINA sobre el silencio. Con una grabación de pantalla
+    muda devuelve, muy convencido, cosas como "Gracias por ver el video" o el crédito
+    de una productora de subtítulos. Eso es peor que no transcribir: el dossier queda
+    con texto plausible que nadie va a poner en duda, tapando lo que el video mostraba.
+    Caso real (26-08-2026): el video con la prueba de un bug quedó registrado como
+    "CC por Antarctica Films Argentina".
+    """
+    r = subprocess.run(
+        ["ffmpeg", "-nostdin", "-i", str(ruta), "-af", "volumedetect", "-f", "null", "-"],
+        capture_output=True, text=True,
+    )
+    if "Stream #" in r.stderr and "Audio:" not in r.stderr:
+        return None  # video sin pista de audio
+    m = re.search(r"mean_volume:\s*(-?\d+(?:\.\d+)?) dB", r.stderr)
+    return float(m.group(1)) if m else None
+
+
+def hoja_de_contactos(video: Path, destino: Path, filas: int = 2, cols: int = 3) -> Path | None:
+    """Rejilla de fotogramas de un video, para LEERLA con el tool `Read`.
+
+    Un video mudo es evidencia visual pura: lo que hay que hacer con él es mirarlo.
+    El script no lo interpreta, igual que con las imágenes — solo lo deja en un formato
+    que el agente pueda abrir de una sola vez, en vez de N fotogramas sueltos.
+    """
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    if destino.is_file():
+        return destino
+    r = subprocess.run(
+        ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+         "-of", "csv=p=0", str(video)],
+        capture_output=True, text=True,
+    )
+    try:
+        dur = float(r.stdout.strip())
+    except (ValueError, AttributeError):
+        return None
+    # Un fotograma por celda, repartidos a lo largo del video.
+    paso = max(dur / (filas * cols + 1), 0.5)
+    r = subprocess.run(
+        ["ffmpeg", "-nostdin", "-loglevel", "error", "-y", "-i", str(video),
+         "-vf", f"fps=1/{paso:.3f},scale=380:-1,tile={cols}x{filas}",
+         "-frames:v", "1", str(destino)],
+        capture_output=True, text=True,
+    )
+    return destino if destino.is_file() else None
+
+
 def transcribir(audio: Path, modelo: Path, idioma: str, hilos: int) -> str:
     """Transcribe un audio con whisper.cpp. Cachea por hash de contenido."""
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -292,6 +351,18 @@ def construir_dossier(mensajes: list[Mensaje], carpeta: Path, titulo: str,
             L.append(f"- `{(carpeta / m.adjunto)}` — enviada por {m.autor}, {m.fecha} {m.hora}")
         L.append("")
 
+    mudos = [m for m in mensajes if m.tipo == "video" and m.mudo and m.hoja]
+    if mudos:
+        L.append("## Videos sin narración — mirar los fotogramas con `Read`")
+        L.append("")
+        L.append("Son grabaciones de pantalla sin voz. Transcribirlas no sirve (whisper alucina")
+        L.append("sobre el silencio), así que de cada una se extrajo una rejilla de fotogramas.")
+        L.append("**Suelen ser la mejor evidencia del chat:** muestran el error tal como ocurrió.")
+        L.append("")
+        for m in mudos:
+            L.append(f"- `{m.hoja}` — de `{m.adjunto}`, enviado por {m.autor}, {m.fecha} {m.hora}")
+        L.append("")
+
     if documentos:
         L.append("## Documentos — leerlos con el tool `Read`")
         L.append("")
@@ -323,7 +394,14 @@ def construir_dossier(mensajes: list[Mensaje], carpeta: Path, titulo: str,
         elif m.tipo == "video":
             L.append(f"{cabecera} 🎬 _video_ (`{m.adjunto}`)")
             L.append("")
-            L.append(f"> {m.transcripcion or '[video sin transcribir]'}")
+            if m.mudo:
+                if m.hoja:
+                    L.append(f"> **Video sin narración.** Mirar los fotogramas con `Read`: `{m.hoja}`")
+                else:
+                    L.append(f"> **Video sin narración** y no se pudo extraer la hoja de "
+                             f"fotogramas. Abrir el archivo a mano: `{(carpeta / m.adjunto)}`")
+            else:
+                L.append(f"> {m.transcripcion or '[video sin transcribir]'}")
             L.append("")
         elif m.tipo == "documento":
             L.append(f"{cabecera} 📎 _documento_ → `{m.adjunto}` (ver sección Documentos)")
@@ -398,6 +476,23 @@ def main() -> None:
                     continue
                 ruta = hallado
             log(f"[{i}/{len(audios)}]")
+
+            # Un video mudo NO se transcribe: whisper alucina sobre el silencio y el
+            # dossier queda con texto inventado en lugar de lo que el video mostraba.
+            # Se resuelve como lo que es, evidencia visual: una hoja de fotogramas
+            # para que el agente la mire con `Read`.
+            if m.tipo == "video":
+                vol = volumen_medio_db(ruta)
+                if vol is None or vol <= UMBRAL_SILENCIO_DB:
+                    motivo = "sin pista de audio" if vol is None else f"volumen medio {vol:.0f} dB"
+                    log(f"  video mudo ({motivo}): hoja de fotogramas en vez de transcripción")
+                    hoja = hoja_de_contactos(
+                        ruta, carpeta / "fotogramas" / f"{Path(m.adjunto).stem}.png")
+                    m.mudo = True
+                    m.hoja = str(hoja) if hoja else None
+                    m.transcripcion = None
+                    continue
+
             m.transcripcion = transcribir(ruta, modelo, args.idioma, args.hilos)
 
     salida.parent.mkdir(parents=True, exist_ok=True)

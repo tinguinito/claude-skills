@@ -21,6 +21,10 @@ Toma el `.zip` que produce WhatsApp (*Exportar chat → Adjuntar archivos*) y es
 ```bash
 brew install whisper-cpp ffmpeg
 mkdir -p ~/.cache/whisper-models && cd ~/.cache/whisper-models
+# El modelo POR DEFECTO del script. Si falta este, no arranca.
+curl -L -o ggml-large-v3-turbo-q5_0.bin \
+  "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin?download=true"
+# Opcional, solo para audio largo y limpio (reuniones): --modelo large-v3-q5_0
 curl -L -o ggml-large-v3-q5_0.bin \
   "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-q5_0.bin?download=true"
 ```
@@ -71,10 +75,24 @@ meses. El costo de mantención tiende a cero.
 - **La transcripción es automática.** Es buena, pero no es un acta. Antes de usar una
   cita literal como prueba (un precio, un compromiso, una cifra), escucha el audio.
   El dossier lleva ese aviso impreso en la cabecera.
-- **Los videos se transcriben igual que los audios.** ffmpeg extrae la pista de audio de un
-  `.mp4` con el mismo comando que usa para un `.opus`, así que no hay dos rutas de código. En el
+- **Los videos CON voz se transcriben igual que los audios.** ffmpeg extrae la pista de audio de
+  un `.mp4` con el mismo comando que usa para un `.opus`, así que no hay dos rutas de código. En el
   dossier salen con 🎬 en vez de 🎙️, para que se sepa que la fuente era un video. Un video de
   varios minutos tarda bastante más que una nota de voz: `--sin-video` los salta.
+
+- **Los videos MUDOS no se transcriben: se miran.** Antes de transcribir, el script mide el
+  volumen medio con `volumedetect`; bajo −60 dB (o sin pista de audio) considera que el video no
+  tiene narración, y en vez de pasarlo por whisper extrae una rejilla de fotogramas que el agente
+  lee con `Read`, igual que una imagen.
+
+  El motivo es que **whisper alucina sobre el silencio**, y con seguridad: devuelve frases como
+  "Gracias por ver el video" o el crédito de una productora de subtítulos. Eso es peor que no
+  transcribir, porque el dossier queda con texto plausible que nadie pone en duda, tapando lo que
+  el video sí mostraba. Caso real (26-08-2026, chat de una operadora en terreno): de cuatro
+  videos, tres eran grabaciones de pantalla mudas a −90 dB; el que contenía la prueba visual del
+  bug que se estaba investigando quedó transcrito como *"CC por Antarctica Films Argentina"*.
+  Una grabación de pantalla muda suele ser **la mejor evidencia del chat**, porque muestra el
+  error tal como ocurrió.
 - **Los documentos no se leen, se listan con su ruta absoluta** en una sección propia, igual que
   las imágenes. El agente abre PDF, docx y planillas de forma nativa: interpretarlos en el script
   sería reimplementar lo que ya sabe hacer. Una cotización adjunta suele traer el dato duro que el
