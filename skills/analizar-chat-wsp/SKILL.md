@@ -35,6 +35,21 @@ ffmpeg -i audio.opus -ar 16000 -ac 1 -y /tmp/a.wav && \
 whisper-cli -m ~/.cache/whisper-models/ggml-large-v3-turbo-q5_0.bin -f /tmp/a.wav -l es --no-prints
 ```
 
+Si el audio suelto tiene **más de una persona** (una nota de voz de Apple grabada en una reunión,
+una conversación con interrupciones de terceros), separar las voces:
+
+```bash
+python3 ~/.claude/skills/analizar-chat-wsp/voces.py grabacion.m4a -n 3 -o /tmp/voces.txt
+```
+
+`-n` es la cantidad de personas; conviene fijarla (en automático agrupa de más). Sale un turno
+por línea, `[mm:ss-mm:ss] H1: ...`, con el tiempo hablado por voz. Las voces salen como H0, H1,
+H2: el modelo las distingue pero no sabe quién es quién. Los nombres los pone el agente por
+contexto (quién pregunta, quién explica el producto) y **lo declara como inferido**. Sirve para
+dejar fuera lo que no es la conversación principal (un niño, alguien que entra a la pieza) y
+para atribuir cada pedido a quien lo dijo, que no es lo mismo si lo dice el cliente o quien
+decide el alcance. La primera vez instala su entorno en `~/.cache/wsp-voces/` (necesita `uv`).
+
 **2. Leer el dossier completo** con `Read`. No trabajar solo con el resumen de cabecera.
 
 **3. Leer cada imagen y cada documento con `Read`.** El dossier los lista con su ruta absoluta en las

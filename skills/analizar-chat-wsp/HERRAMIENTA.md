@@ -32,6 +32,10 @@ curl -L -o ggml-large-v3-q5_0.bin \
 Nada más: no hay entorno virtual, no hay dependencias de Python (solo la librería
 estándar), no hay API key, no hay cuenta que configurar.
 
+La única excepción es `voces.py` (separación de hablantes), que necesita `uv` (`brew install uv`)
+y se arma solo su entorno en `~/.cache/wsp-voces/` la primera vez (unos 100 MB entre
+sherpa-onnx y dos modelos). Ver "Separación de hablantes" más abajo.
+
 ## Uso
 
 ```bash
@@ -102,6 +106,45 @@ meses. El costo de mantención tiende a cero.
   si dice `desconocido`, el parseo falló y hay que revisar el `.txt`.
 - El export de WhatsApp **trunca los chats muy largos**; es límite de WhatsApp, no del
   script.
+
+## Separación de hablantes (`voces.py`)
+
+`wsp_dossier.py` no separa voces porque en un export de WhatsApp no hace falta: cada nota de
+voz ya viene firmada por quien la mandó. El caso distinto es una **grabación de reunión**
+(Notas de Voz de Apple, un m4a de 10 minutos con 2 o 3 personas y a veces alguien más de fondo).
+Ahí `voces.py` transcribe con el mismo whisper.cpp y, encima, agrupa por hablante.
+
+```bash
+python3 voces.py grabacion.m4a -n 3            # fijar la cantidad de personas
+python3 voces.py grabacion.m4a                 # automático, umbral 0.9 (-t para ajustar)
+```
+
+**Cómo lo hace, y por qué así.** Se evaluaron tres vías el 10/10/2026:
+
+- `whisper-cli --diarize` solo sirve para audio estéreo con una persona por canal, y
+  `--tinydiarize` marca cambios de turno sin decir quién habla y solo tiene modelo en inglés.
+  Descartadas.
+- pyannote.audio con WhisperX es el estándar, pero exige cuenta en Hugging Face, aceptar
+  condiciones de dos modelos y bajar torch (varios GB). Descartada por fricción, no por calidad.
+- **sherpa-onnx** trae el mismo modelo de segmentación de pyannote 3.0 convertido a ONNX, de
+  descarga libre desde GitHub, más una huella de voz CAM++ de 3D-Speaker (28 MB). Sin cuenta ni
+  token, y el audio no sale del Mac. Es lo que usa `voces.py`.
+
+Medido con una reunión real de 8 min 46 s en un M1 Pro: 1 min 24 s de diarización más la
+transcripción habitual. Con 3 voces fijadas, el reparto fue consistente de principio a fin y
+aisló los 16 segundos de un menor que interrumpió la conversación.
+
+**Límites.**
+
+- **Fijar `-n` casi siempre.** En automático el agrupamiento tiende a partir una misma voz en
+  varias: la misma grabación dio 38 voces con umbral 0,5 y 7 con umbral 1,0. Si no se sabe
+  cuántas personas había, probar 2 y 3 y mirar cuál calza.
+- **Distingue voces, no las reconoce.** H0, H1 y H2 son etiquetas. El nombre lo infiere el agente
+  por el contenido y lo deja marcado como inferido en la nota.
+- **Los bordes entre turnos son dudosos.** Una frase corta dicha justo al cambiar de hablante
+  (un "sí", un "10 de 10") puede caer en la voz equivocada. Lo que comprometa se confirma escuchando.
+- `-ml 1 -sow` corta por palabra, no por token, para que un cambio de voz no parta una palabra
+  por la mitad.
 
 ## Relación con el puente WhatsApp (P4)
 
