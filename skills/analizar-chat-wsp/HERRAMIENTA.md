@@ -142,7 +142,12 @@ aisló los 16 segundos de un menor que interrumpió la conversación.
 - **Distingue voces, no las reconoce.** H0, H1 y H2 son etiquetas. El nombre lo infiere el agente
   por el contenido y lo deja marcado como inferido en la nota.
 - **Los bordes entre turnos son dudosos.** Una frase corta dicha justo al cambiar de hablante
-  (un "sí", un "10 de 10") puede caer en la voz equivocada. Lo que comprometa se confirma escuchando.
+  (un "sí", un "10 de 10") puede caer en la voz equivocada, y la última palabra de un turno puede
+  quedar pegada al siguiente ("voy a" en una voz, "reiniciar la demo" en la otra). Lo que comprometa
+  se confirma escuchando.
+- **Las voces con poco tiempo salen subestimadas.** Un menor con 15 s de habla en 9 minutos aporta
+  pocos segmentos a su grupo; un saludo suyo puede caer en la voz dominante. Si una voz secundaria
+  importa, mirar sus tramos uno por uno en vez de fiarse del tiempo hablado.
 - `-ml 1 -sow` corta por palabra, no por token, para que un cambio de voz no parta una palabra
   por la mitad.
 
