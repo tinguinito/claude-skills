@@ -6,3 +6,4 @@ grabaciones/
 *.respaldo-*
 # frames temporales del generador de medios
 recursos/.frames-*/
+__pycache__/

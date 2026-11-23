@@ -1,6 +1,6 @@
 # claude-skills
 
-Tres skills para asistentes de IA de terminal, sacadas de trabajo real y con las reglas duras que
+Cuatro skills para asistentes de IA de terminal, sacadas de trabajo real y con las reglas duras que
 costó aprender escritas adentro.
 
 ```bash
@@ -140,6 +140,45 @@ Dos reglas que no se saltan, ambas aprendidas a golpes:
 
 ---
 
+## `traer-de-youtube`: un video convertido en material de trabajo
+
+Le pasas un link y trae a tu disco lo que sirve de él:
+
+```bash
+python3 traer.py transcribir "https://www.youtube.com/watch?v=..." --salida docs/youtube
+python3 traer.py capturas "https://www.youtube.com/watch?v=..." --en 10:30,16:20
+bash audio-a-pendrive.sh "https://www.youtube.com/watch?v=..." "https://youtu.be/..."
+```
+
+La transcripción sale en markdown con la descripción completa del video (donde suelen estar el
+repo y los comandos), los capítulos y cada párrafo con su minuto enlazado, para que el asistente
+estudie un tutorial o implemente lo que enseña:
+
+```markdown
+### ¿Qué es git?
+
+[1:56](https://youtu.be/jGehuhFhtnE?t=116) ahora si vamos al tema qué cosa es git para
+explicártelo te voy a poner una sencilla analogía...
+```
+
+Usa los subtítulos del video, los manuales antes que los automáticos (que repiten cada línea y se
+limpian), y si no hay ninguno transcribe en local con whisper.cpp. Lo que se muestra en pantalla
+y no se dice, como el código, se saca con `capturas`.
+
+El audio va a un pendrive o una tarjeta SD con nombres limpios para la pantalla de una radio de
+auto. Dos reglas que trae, las dos medidas:
+
+1. **La copia la hace bash, no Python.** En macOS, todo archivo que crea un proceso hijo de Python
+   queda con `com.apple.provenance`, y en FAT32 eso deja un `._cancion.mp3` oculto por canción,
+   que muchas radios muestran como pista rota. Ni siquiera un `cp -X` se salva si lo lanza Python.
+2. **Cada copia se compara por MD5, leyendo de la unidad y no de la memoria.** Una tarjeta SD de
+   4 GB aceptó 13 canciones sin dar error y devolvió otra cosa al leerlas: solo guardaba bien los
+   primeros ~88 MB. Comparar recién escrito no basta, porque la lectura puede salir de la memoria
+   del sistema, así que al terminar la skill desmonta la unidad, la monta de nuevo y vuelve a
+   comparar cada copia.
+
+---
+
 ## Instalación
 
 ```bash
@@ -163,6 +202,7 @@ de skills y avisa dónde quedó.
 | `optimizar-disco` | macOS, Python 3.8+ |
 | `analizar-chat-wsp` | Python 3.8+, `ffmpeg`, `whisper-cli` con un modelo en `~/.cache/whisper-models/` |
 | `grabar-demo` | Node 18+, `ffmpeg`, `npx playwright install chromium` |
+| `traer-de-youtube` | Python 3.8+, `yt-dlp`, `ffmpeg`, `deno`; para transcribir sin subtítulos, `whisper-cli` con un modelo en `~/.cache/whisper-models/` |
 
 Cada skill dice en su `SKILL.md` qué necesita y qué hace si falta.
 
@@ -176,7 +216,7 @@ Es texto plano, no un plugin compilado, así que la misma carpeta sirve en cualq
 que soporte el formato.
 
 Lo que hace útil a una skill no es describir la tarea: es lo que se aprendió haciéndola. Qué
-falla, qué hay que verificar antes, qué error ya se cometió y no debe repetirse. En estas tres,
+falla, qué hay que verificar antes, qué error ya se cometió y no debe repetirse. En estas cuatro,
 eso está escrito con el caso que lo originó, porque un agente que no sabe por qué existe una regla
 la salta en cuanto le estorba.
 
